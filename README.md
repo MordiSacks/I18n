@@ -2,7 +2,7 @@
 Small but powerful locale library.
 
 # Installation
-```
+``` 
 composer require mordisacks/i18n
 ```
 
