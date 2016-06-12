@@ -10,6 +10,8 @@ class I18n
 	protected static $dir = null;
 	/** @var  string Current locale */
 	protected static $locale = null;
+	/** @var array Loaded locales */
+	protected static $loaded = [];
 
 	/**
 	 * Get locale directory
@@ -59,13 +61,18 @@ class I18n
 	{
 		$file = static::$dir . DIRECTORY_SEPARATOR . static::$locale . DIRECTORY_SEPARATOR . $text_domain . '.php';
 
-		$lang = [];
-		if(file_exists($file))
+		if(array_key_exists($file, self::$loaded))
 		{
-			/** @noinspection PhpIncludeInspection */
-			$lang = require($file);
+			return isset(self::$loaded[$file][$string]) ? self::$loaded[$file][$string] : $string;
 		}
 
-		return (isset($lang[$string]) ? $lang[$string] : $string);
+		if(!file_exists($file))
+		{
+			return $string;
+		}
+		/** @noinspection PhpIncludeInspection */
+		self::$loaded[$file] = (array)require $file;
+
+		return isset(self::$loaded[$file][$string]) ? self::$loaded[$file][$string] : $string;
 	}
 }
