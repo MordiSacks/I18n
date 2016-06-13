@@ -13,6 +13,14 @@ Set locales directory
 \MordiSacks\I18n\I18n::setDir('Lang');
 ```
 
+Production mode, Added in version 1.1.0
+If Production is set to false, 
+Any missing domains and/or strings will be auto generated
+To use, simply state the following
+```
+\MordiSacks\I18n\I18n::setProduction(false);
+```
+
 Set current locale
 ```
 \MordiSacks\I18n\I18n::setLocale('he_IL');
