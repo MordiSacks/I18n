@@ -13,6 +13,14 @@ Set locales directory
 \MordiSacks\I18n\I18n::setDir('Lang');
 ```
 
+Variable injection!
+Added in version 2.0.0
+```
+$name = 'Mordi';
+echo __('Hello :name', 'default', compact('name'))
+// Outputs "Hello Mordi"
+```
+
 Production mode, Added in version 1.1.0
 If Production is set to false, 
 Any missing domains and/or strings will be auto generated
