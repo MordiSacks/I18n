@@ -3,74 +3,22 @@
 
 namespace MordiSacks\I18n;
 
-
+/**
+ * Class I18n
+ * @package MordiSacks\I18n
+ */
 class I18n
 {
+	use LocaleMaker;
+
 	/** @var  string Lang directory */
-	protected static $dir = null;
+	public static $dir = null;
 	/** @var  boolean|bool Production mode */
-	protected static $production = true;
+	public static $production = true;
 	/** @var  string Current locale */
-	protected static $locale = null;
+	public static $locale = null;
 	/** @var array Loaded locales */
 	protected static $loaded = [];
-
-	/**
-	 * Get locale directory
-	 * @return string
-	 */
-	public static function getDir()
-	{
-		return self::$dir;
-	}
-
-	/**
-	 * Set Locales directory
-	 *
-	 * @param $dir
-	 */
-	public static function setDir($dir)
-	{
-		self::$dir = $dir;
-	}
-
-	/**
-	 * @return boolean
-	 */
-	public static function isProduction()
-	{
-		return self::$production;
-	}
-
-	/**
-	 * If is set to false, we will create all missing files and strings
-	 *
-	 * @param boolean $production
-	 */
-	public static function setProduction($production)
-	{
-		self::$production = $production;
-	}
-
-
-	/**
-	 * Set locale
-	 * @return string
-	 */
-	public static function getLocale()
-	{
-		return self::$locale;
-	}
-
-	/**
-	 * Get locale
-	 *
-	 * @param string $locale
-	 */
-	public static function setLocale($locale)
-	{
-		self::$locale = $locale;
-	}
 
 	/**
 	 * @param string $string      Text to be translated
@@ -78,7 +26,7 @@ class I18n
 	 *
 	 * @return string Translated text
 	 */
-	public static function translate($string, $text_domain = 'default')
+	protected static function loadTranslation($string, $text_domain)
 	{
 		/** @var string $file locale file path */
 		$file = static::$dir . DIRECTORY_SEPARATOR . static::$locale . DIRECTORY_SEPARATOR . $text_domain . '.php';
@@ -86,18 +34,18 @@ class I18n
 		/**
 		 * Check if we already loaded this file
 		 */
-		if(array_key_exists($file, self::$loaded))
+		if(array_key_exists($file, static::$loaded))
 		{
 			/**
 			 * Save missing string if not in production
 			 */
-			if(!self::isProduction() && (!isset(self::$loaded[$file][$string])))
+			if(!static::$production && (!isset(static::$loaded[$file][$string])))
 			{
-				return self::addTranslation($file, $string);
+				return static::addTranslation($file, $string);
 			}
 
 			/** return processed string */
-			return isset(self::$loaded[$file][$string]) && !empty(self::$loaded[$file][$string]) ? self::$loaded[$file][$string] : $string;
+			return isset(static::$loaded[$file][$string]) && !empty(static::$loaded[$file][$string]) ? self::$loaded[$file][$string] : $string;
 		}
 
 		/**
@@ -108,68 +56,79 @@ class I18n
 			/**
 			 * Create file if not in production
 			 */
-			if(!self::isProduction())
+			if(!static::$production)
 			{
-				self::saveTranslationFile($file, [$string => '']);
+				static::saveTranslationFile($file, [$string => '']);
 			}
 
 			return $string;
 		}
 		/** @noinspection PhpIncludeInspection */
-		self::$loaded[$file] = (array)require $file;
+		static::$loaded[$file] = (array)require $file;
 
 		/**
 		 * Save missing string if not in production
 		 */
-		if(!self::isProduction() && (!isset(self::$loaded[$file][$string])))
+		if(!static::$production && (!isset(static::$loaded[$file][$string])))
 		{
-			return self::addTranslation($file, $string);
+			return static::addTranslation($file, $string);
 		}
 
 		/** return processed string */
-		return isset(self::$loaded[$file][$string]) && !empty(self::$loaded[$file][$string]) ? self::$loaded[$file][$string] : $string;
+		return isset(static::$loaded[$file][$string]) && !empty(static::$loaded[$file][$string]) ? static::$loaded[$file][$string] : $string;
 	}
 
 	/**
-	 * @param $file
-	 * @param $strings
-	 */
-	protected static function saveTranslationFile($file, $strings)
-	{
-		file_put_contents($file, "<?php\n/** I18n Auto generated file on " . date('Y-m-d H:i:s') . " */\nreturn " . self::TranslationArrayExport($strings));
-	}
-
-	/**
-	 * Like var_export, but pretty
+	 * @param string $string Translated text
+	 * @param array  $vars   Associative array of vars to inject
 	 *
-	 * @param array $array I18n strings
+	 * @return string Translated and vared text
+	 */
+	public static function dropVars($string, $vars = [])
+	{
+		return strtr($string, array_flip(array_map(function ($v) { return ':' . $v; }, array_flip($vars))));
+	}
+
+	/**
+	 * @param        $string
+	 * @param string $text_domain
+	 * @param array  $vars
 	 *
 	 * @return string
 	 */
-	protected static function TranslationArrayExport($array)
+	public static function translate($string, $text_domain = 'default', $vars = [])
 	{
-		$output = "[\n";
-		foreach($array as $key => $value)
+		return static::dropVars(static::loadTranslation($string, $text_domain), $vars);
+	}
+
+	/**
+	 * Get all strings available
+	 * Not for use in production
+	 * @return array
+	 * @throws \Exception
+	 */
+	public static function getAllStrings()
+	{
+		if(is_null(self::$dir) || is_null(self::$locale))
 		{
-			$output .= "\t'{$key}' => '{$value}',\n";
+			throw new \Exception('Locales directory and locale must be set');
 		}
 
-		return $output . "];";
-	}
+		$strings = [];
+		foreach(scandir(self::$dir . DIRECTORY_SEPARATOR . self::$locale) as $text_domain)
+		{
+			if($text_domain == '.' || $text_domain == '..')
+			{
+				continue;
+			}
 
-	/**
-	 * Add missing string to an existing locale
-	 *
-	 * @param string $file
-	 * @param string $string
-	 *
-	 * @return string
-	 */
-	protected static function addTranslation($file, $string)
-	{
-		self::$loaded[$file] = array_merge(self::$loaded[$file], [$string => '']);
-		self::saveTranslationFile($file, self::$loaded[$file]);
+			/** @noinspection PhpIncludeInspection */
+			foreach((array)require self::$dir . DIRECTORY_SEPARATOR . self::$locale . DIRECTORY_SEPARATOR . $text_domain as $string => $value)
+			{
+				$strings[$string] = $value;
+			}
+		}
 
-		return $string;
+		return $strings;
 	}
 }

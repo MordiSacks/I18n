@@ -1,7 +1,9 @@
 <?php
 require_once '../vendor/autoload.php';
 
-\MordiSacks\I18n\I18n::setDir('Lang');
-\MordiSacks\I18n\I18n::setLocale('he_IL');
+\MordiSacks\I18n\I18n::$dir        = 'Lang';
+\MordiSacks\I18n\I18n::$production = true;
+\MordiSacks\I18n\I18n::$locale     = 'he_IL';
 
-echo __('Hello World!', 'default');
+$name = 'מורדי';
+echo MordiSacks\I18n\I18n::translate('Hello :name', 'default', compact('name'));
