@@ -10,15 +10,12 @@ composer require mordisacks/i18n
 
 Set locales directory
 ```
-\MordiSacks\I18n\I18n::setDir('Lang');
+\MordiSacks\I18n\I18n::$dir = 'Lang';
 ```
 
-Variable injection!
-Added in version 2.0.0
+Set current locale
 ```
-$name = 'Mordi';
-echo __('Hello :name', 'default', compact('name'))
-// Outputs "Hello Mordi"
+\MordiSacks\I18n\I18n::$locale = 'he_IL';
 ```
 
 Production mode, Added in version 1.1.0
@@ -26,12 +23,7 @@ If Production is set to false,
 Any missing domains and/or strings will be auto generated
 To use, simply state the following
 ```
-\MordiSacks\I18n\I18n::setProduction(false);
-```
-
-Set current locale
-```
-\MordiSacks\I18n\I18n::setLocale('he_IL');
+\MordiSacks\I18n\I18n::$production = false;
 ```
 
 Translate!
@@ -45,4 +37,12 @@ echo \MordiSacks\I18n\I18n::translate('Hello World!');
 And via helper
 ```
 echo __('Hello World!');
+```
+
+Variable injection!
+Added in version 2.0.0
+```
+$name = 'Mordi';
+echo __('Hello :name', 'default', compact('name'))
+// Outputs "Hello Mordi"
 ```
