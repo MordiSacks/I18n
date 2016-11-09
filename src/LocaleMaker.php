@@ -5,6 +5,7 @@ namespace MordiSacks\I18n;
 
 /**
  * Class LocaleMaker
+ *
  * @package MordiSacks\I18n
  */
 trait LocaleMaker
@@ -19,8 +20,8 @@ trait LocaleMaker
 	 */
 	protected static function addTranslation($file, $string)
 	{
-		static::$loaded[$file] = array_merge(static::$loaded[$file], [$string => '']);
-		static::saveTranslationFile($file, static::$loaded[$file]);
+		static::$loaded[ $file ] = array_merge(static::$loaded[ $file ], [$string => '']);
+		static::saveTranslationFile($file, static::$loaded[ $file ]);
 
 		return $string;
 	}
@@ -37,6 +38,11 @@ trait LocaleMaker
 		$output = "[\n";
 		foreach($array as $key => $value)
 		{
+			/**
+			 * Escape '
+			 */
+			$key   = str_replace('\'', '\\\'', $key);
+			$value = str_replace('\'', '\\\'', $value);
 			$output .= "\t'{$key}' => '{$value}',\n";
 		}
 
@@ -49,6 +55,18 @@ trait LocaleMaker
 	 */
 	protected static function saveTranslationFile($file, $strings)
 	{
+		/**
+		 * Get path info
+		 */
+		$pathinfo = pathinfo($file);
+
+		/**
+		 * Create Directory if not exist
+		 */
+		if(!file_exists($pathinfo['dirname']))
+		{
+			mkdir($pathinfo['dirname']);
+		}
 		file_put_contents($file, "<?php\n/** I18n Auto generated file on " . @date('Y-m-d H:i:s') . " */\nreturn " . static::TranslationArrayExport($strings));
 	}
 }
