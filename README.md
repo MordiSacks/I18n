@@ -18,12 +18,12 @@ Set current locale
 \MordiSacks\I18n\I18n::$locale = 'he_IL';
 ```
 
-Production mode, Added in version 1.1.0
-If Production is set to false, 
+Auto generate mode,
+If autoGenerate is set to true, 
 Any missing domains and/or strings will be auto generated
 To use, simply state the following
 ```
-\MordiSacks\I18n\I18n::$production = false;
+\MordiSacks\I18n\I18n::$autoGenerate = true;
 ```
 
 Translate!
@@ -46,3 +46,7 @@ $name = 'Mordi';
 echo __('Hello :name', 'default', compact('name'))
 // Outputs "Hello Mordi"
 ```
+
+# changelog
+## 3.0.0
+* Renamed production to autoGenerate
