@@ -22,10 +22,10 @@ trait LocaleMaker
     {
         static::$loaded[$file] = array_merge(static::$loaded[$file], [$string => '']);
         static::saveTranslationFile($file, static::$loaded[$file]);
-
+        
         return $string;
     }
-
+    
     /**
      * Like var_export, but pretty
      *
@@ -40,14 +40,14 @@ trait LocaleMaker
             /**
              * Escape '
              */
-            $key    = str_replace('\'', '\\\'', $key);
-            $value  = str_replace('\'', '\\\'', $value);
+            $key = str_replace('\'', '\\\'', $key);
+            $value = str_replace('\'', '\\\'', $value);
             $output .= "\t'{$key}' => '{$value}',\n";
         }
-
+        
         return $output . "];";
     }
-
+    
     /**
      * @param $file
      * @param $strings
@@ -58,12 +58,12 @@ trait LocaleMaker
          * Get path info
          */
         $pathinfo = pathinfo($file);
-
+        
         /**
          * Create Directory if not exist
          */
         if (!file_exists($pathinfo['dirname'])) {
-            mkdir($pathinfo['dirname']);
+            mkdir($pathinfo['dirname'], 0777, true);
         }
         file_put_contents($file, "<?php\n/** I18n Auto generated file on " . @date('Y-m-d H:i:s') . " */\nreturn " . static::TranslationArrayExport($strings));
     }
